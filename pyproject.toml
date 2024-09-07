@@ -11,7 +11,7 @@ license.file = "LICENSE"
 authors = [
   { name = "Mugdha Arunim Ahmed", email = "mugshaarunimahmed2017@gmail.com" },
 ]
-requires-python = ">=3.8,<3.13"
+requires-python = ">=3.8"
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
@@ -32,13 +32,10 @@ classifiers = [
   "Framework :: Django :: 5.1",
 ]
 keywords = ["django", "static"]
-dependencies = [
-  "django>=4.2; python_version < '3.10'",
-  "django>=5; python_version >= '3.10'",
-]
+dependencies = ["django>=4.2,<6", "pydantic>=2"]
 
 [tool.uv]
-dev-dependencies = ["django-stubs>=5.0.4", "ruff>=0.6.4"]
+dev-dependencies = ["django-stubs", "ruff"]
 
 [tool.basedpyright]
 typeCheckingMode = "basic"
