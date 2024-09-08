@@ -46,42 +46,89 @@ exclude = [".venv"]
 [tool.ruff]
 extend-exclude = ["**/migrations/**/*.py"]
 preview = true
-respect-gitignore = true
 show-fixes = true
-output-format = "full"
+target-version = "py312"
+unsafe-fixes = true
+
+[tool.ruff.format]
+docstring-code-format = true
 
 [tool.ruff.lint]
-ignore-init-module-imports = true
 select = [
-  "I",
-  "N",
-  "UP",
-  "ASYNC",
-  "C4",
-  "T10",
-  "DJ",
-  "EM",
-  "PIE",
-  "T20",
-  "PT",
-  "RSE",
-  "RET",
-  "SIM",
-  "PTH",
-  "TD",
-  "FIX",
-  "ERA",
-  "PL",
-  "TRY",
-  "PERF",
-  "FURB",
-  "RUF",
+  "F",   # pyflakes
+  "E",   # pycodestyle
+  "W",   # pycodestyle
+  "C90", # mccabe
+  "I",   # isort
+  "N",   # pep8-naming
+  # "D", # pydocstyle
+  "UP",  # pyupgrade
+  "YTT", # flake8-2020
+  # "ANN", # flake8-annotations: we should support this in the future but 100+ errors atm
+  "ASYNC", # flake8-async
+  "S",     # flake8-bandit
+  "BLE",   # flake8-blind-except
+  "FBT",   # flake8-boolean-trap
+  "B",     # flake8-bugbear
+  "A",     # flake8-builtins
+  "COM",   # flake8-commas
+  # "CPY", # flake8-copyright
+  "C4",   # flake8-comprehensions
+  "DTZ",  # flake8-datetimez
+  "T10",  # flake8-debugger
+  "DJ",   # flake8-django
+  "EM",   # flake8-errmsg
+  "EXE",  # flake8-executable
+  "FA",   # flake8-future-annotations
+  'ISC',  # flake8-implicit-str-concat
+  "ICN",  # flake8-import-conventions
+  "LOG",  # flake8-logging
+  "G",    # flake8-logging-format
+  'INP',  # flake8-no-pep420
+  'PIE',  # flake8-pie
+  "T20",  # flake8-print
+  'PYI',  # flake8-pyi
+  'PT',   # flake8-pytest-style
+  "Q",    # flake8-quotes
+  "RSE",  # flake8-raise
+  "RET",  # flake8-return
+  "SLF",  # flake8-self
+  "SLOT", # flake8-slots
+  "SIM",  # flake8-simplify
+  "TID",  # flake8-tidy-imports
+  "TCH",  # flake8-type-checking
+  "INT",  # flake8-gettext
+  # "ARG", # flake8-unused-arguments: Unused function argument
+  "PTH", # flake8-use-pathlib
+  "TD",  # flake8-todos
+  "FIX", # flake8-fixme
+  "ERA", # eradicate
+  "PD",  # pandas-vet
+  "PGH", # pygrep-hooks
+  "PL",  # Pylint
+  "TRY", # tryceratops
+  "FLY", # flynt
+  # "NPY", # NumPy-specific rules
+  # "FAST", # FastAPI
+  # "AIR", # Airflow
+  "PERF", # Perflint
+  # "FURB", # refurb
+  # "DOC", # pydoclint
+  "RUF", # Ruff-specific rules
 ]
-ignore = []
+ignore = [
+  "COM812", # missing-tailing-comma: conflicts with ruff format
+  "ISC001", # single-line-implicit-string-concatenation: conflicts with ruff format
+  "RUF012", # mutable-class-default: annoying to fix
+  "SIM102", # collapsible-if: sometimes it's better to nest
+]
+unfixable = ["F401"]
 
 [tool.ruff.lint.isort]
 case-sensitive = true
 combine-as-imports = true
+detect-same-package = true
+force-sort-within-sections = true
 force-wrap-aliases = true
 known-first-party = ["django"]
-known-local-folder = ["django_node_loader"]
+known-third-party = ["django_node_loader"]

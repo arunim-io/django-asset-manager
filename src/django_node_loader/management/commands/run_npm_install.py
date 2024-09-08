@@ -1,9 +1,11 @@
+# ruff: noqa: S404, S603
+
 from shutil import which
 from subprocess import CalledProcessError, check_output
 
-from django.core.management.base import BaseCommand
+from django_node_loader.conf import settings
 
-from ...conf import settings
+from django.core.management.base import BaseCommand
 
 
 class NodePackageContext:
