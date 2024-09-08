@@ -1,6 +1,5 @@
 # ruff: noqa: S404, S603
 
-from shutil import which
 from subprocess import CalledProcessError, check_output
 
 from django_node_loader.conf import settings
@@ -32,18 +31,20 @@ class Command(BaseCommand):
                 f"`{settings.PACKAGE_JSON_PATH}` couldn't be found. Exiting..."
             )
         if not settings.NODE_MODULES_PATH.exists():
-            self.stdout.write(
+            self.stderr.write(
                 f"{settings.NODE_MODULES_PATH} doesn't exist. Creating now..."
             )
             settings.NODE_MODULES_PATH.mkdir(parents=True)
 
-        npm_exe = which("npm")
+        npm_exe = settings.PACKAGE_MANAGER.EXE_PATH
 
         if not npm_exe:
-            self.stderr.write("npm not found. Is it installed in your system?")
+            self.stderr.write(
+                f"{settings.PACKAGE_MANAGER.NAME} not found. Is it installed in your system?"  # noqa: E501
+            )
         else:
             with NodePackageContext():
-                self.stdout.write(self.style.NOTICE("Installing dependencies"))
+                self.stdout.write("Installing dependencies", self.style.NOTICE)
 
                 try:
                     output = check_output(
@@ -58,10 +59,9 @@ class Command(BaseCommand):
                     )
                 except CalledProcessError as err:
                     self.stderr.write(f"Error occured while running npm, {err}")
-
-                self.stdout.write(output)
-                self.stdout.write(
-                    self.style.SUCCESS(
-                        "All dependencies have been successfully installed."
+                finally:
+                    self.stdout.write(output)
+                    self.stdout.write(
+                        "All dependencies have been successfully installed.",
+                        self.style.SUCCESS,
                     )
-                )
