@@ -1,10 +1,10 @@
 from pathlib import Path
 import shutil
-from typing import Literal
+from typing import Literal, Self
 
 from pydantic import BaseModel, Field, computed_field
 
-from django.conf import settings
+from django.conf import LazySettings, settings
 
 DEFAULT_IGNORE_PATTERNS = [
     "*.less",
@@ -85,9 +85,6 @@ class PackageManagerSettings(BaseModel):
             return Path(exe)
         return None
 
-    class Config:
-        from_attributes = True
-
 
 class Settings(BaseModel):
     ignore_patterns: list[str] = Field(
@@ -106,13 +103,22 @@ class Settings(BaseModel):
         alias="PACKAGE_JSON_PATH",
     )
     package_manager: PackageManagerSettings = Field(
-        ...,
+        default_factory=PackageManagerSettings,
         description="Options for package manager",
         alias="PACKAGE_MANAGER",
     )
 
-    class Config:
-        from_attributes = True
+    @classmethod
+    def from_django_settings(cls, settings: LazySettings) -> Self:
+        app_settings: dict[str, str | Path] = settings.NODE_LOADER
+
+        if not app_settings:
+            return cls()
+
+        if not app_settings["PACKAGE_MANAGER"]:
+            app_settings["PACKAGE_MANAGER"] = PackageManagerSettings().model_dump_json()
+
+        return cls.model_validate(app_settings)
 
 
-settings = Settings.model_validate(getattr(settings, "NODE_LOADER", {}))
+settings = Settings.from_django_settings(settings)
