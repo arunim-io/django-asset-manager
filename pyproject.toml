@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "django-node-loader"
-version = "0.1.0"
+version = "0.1.3"
 description = "Django app for managing assets using npm packages."
 readme = "README.md"
 license.file = "LICENSE"
