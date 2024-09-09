@@ -1,10 +1,9 @@
+from dataclasses import dataclass, field, fields
 from pathlib import Path
 import shutil
-from typing import Literal, Self
+from typing import Literal
 
-from pydantic import BaseModel, Field, computed_field
-
-from django.conf import LazySettings, settings
+from django.conf import settings
 
 DEFAULT_IGNORE_PATTERNS = [
     "*.less",
@@ -68,17 +67,10 @@ DEFAULT_IGNORE_PATTERNS = [
 ]
 
 
-class PackageManagerSettings(BaseModel):
-    name: Literal["npm", "yarn", "pnpm", "bun"] = Field(
-        default="npm", description="The package manager to use.", alias="NAME"
-    )
+@dataclass
+class PackageManagerSettings:
+    name: Literal["npm", "yarn", "pnpm", "bun"] = "npm"
 
-    @computed_field(
-        description="""Path to the package manager.
-        Must match with `PACKAGE_MANAGER.NAME`.
-        """,
-        alias="EXE_PATH",
-    )
     @property
     def exe_path(self) -> Path | None:
         if exe := shutil.which(self.name):
@@ -86,39 +78,22 @@ class PackageManagerSettings(BaseModel):
         return None
 
 
-class Settings(BaseModel):
-    ignore_patterns: list[str] = Field(
-        default=DEFAULT_IGNORE_PATTERNS,
-        description="A list of patterns that will be ignored by the static finder.",
-        alias="IGNORE_PATTERNS",
-    )
-    node_modules_path: Path = Field(
-        default=Path(settings.BASE_DIR, "node_modules"),
-        description="The path to `node_modules` directory.",
-        alias="NODE_MODULES_PATH",
-    )
-    package_json_path: Path = Field(
-        default=Path(settings.BASE_DIR, "package.json"),
-        description="The path to `package.json`.",
-        alias="PACKAGE_JSON_PATH",
-    )
-    package_manager: PackageManagerSettings = Field(
+@dataclass
+class Settings:
+    ignore_patterns: list[str] = field(default_factory=lambda: DEFAULT_IGNORE_PATTERNS)
+    node_modules_path: Path = Path(settings.BASE_DIR, "node_modules")
+    package_json_path: Path = Path(settings.BASE_DIR, "package.json")
+    package_manager: PackageManagerSettings = field(
         default_factory=PackageManagerSettings,
-        description="Options for package manager",
-        alias="PACKAGE_MANAGER",
     )
 
-    @classmethod
-    def from_django_settings(cls, settings: LazySettings) -> Self:
-        app_settings: dict[str, str | Path] = settings.NODE_LOADER
-
-        if not app_settings:
-            return cls()
-
-        if not app_settings["PACKAGE_MANAGER"]:
-            app_settings["PACKAGE_MANAGER"] = PackageManagerSettings().model_dump_json()
-
-        return cls.model_validate(app_settings)
+    @staticmethod
+    def parse():
+        parsed_settings = {
+            field.name: getattr(settings, field.name.upper(), field.default)
+            for field in fields(Settings)
+        }
+        return Settings(**parsed_settings)  # pyright: ignore[reportArgumentType]
 
 
-settings = Settings.from_django_settings(settings)
+settings = Settings.parse()

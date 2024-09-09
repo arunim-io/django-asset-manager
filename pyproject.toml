@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "django-node-loader"
-version = "0.1.4"
+version = "0.1.5"
 description = "Django app for managing assets using npm packages."
 readme = "README.md"
 license.file = "LICENSE"
@@ -32,7 +32,9 @@ classifiers = [
   "Framework :: Django :: 5.1",
 ]
 keywords = ["django", "static"]
-dependencies = ["django>=4.2,<6", "pydantic>=2"]
+dependencies = [
+    "django>=4.2,<6",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/node_loader"]
