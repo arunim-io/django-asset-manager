@@ -9,11 +9,11 @@ from django.core.management.base import BaseCommand
 
 class NodePackageContext:
     def __init__(self):
-        self.package_json = settings.NODE_MODULES_PATH.parent.joinpath("package.json")
+        self.package_json = settings.node_modules_path.parent.joinpath("package.json")
 
     def __enter__(self):
         if not self.package_json.exists():
-            self.package_json.symlink_to(settings.PACKAGE_JSON_PATH)
+            self.package_json.symlink_to(settings.package_json_path)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -26,21 +26,21 @@ class Command(BaseCommand):
     help = "Alias for npm install"
 
     def handle(self, *args, **options):
-        if not settings.PACKAGE_JSON_PATH.exists():
+        if not settings.package_json_path.exists():
             self.stderr.write(
-                f"`{settings.PACKAGE_JSON_PATH}` couldn't be found. Exiting..."
+                f"`{settings.package_json_path}` couldn't be found. Exiting..."
             )
-        if not settings.NODE_MODULES_PATH.exists():
+        if not settings.node_modules_path.exists():
             self.stderr.write(
-                f"{settings.NODE_MODULES_PATH} doesn't exist. Creating now..."
+                f"{settings.node_modules_path} doesn't exist. Creating now..."
             )
-            settings.NODE_MODULES_PATH.mkdir(parents=True)
+            settings.node_modules_path.mkdir(parents=True)
 
-        npm_exe = settings.PACKAGE_MANAGER.EXE_PATH
+        npm_exe = settings.package_manager.exe_path
 
         if not npm_exe:
             self.stderr.write(
-                f"{settings.PACKAGE_MANAGER.NAME} not found. Is it installed in your system?"  # noqa: E501
+                f"{settings.package_manager.name} not found. Is it installed in your system?"  # noqa: E501
             )
         else:
             with NodePackageContext():
@@ -54,7 +54,7 @@ class Command(BaseCommand):
                             "--no-package-lock",
                             "--omit dev",
                         ],
-                        cwd=settings.NODE_MODULES_PATH.parent,
+                        cwd=settings.node_modules_path.parent,
                         encoding="utf-8",
                     )
                 except CalledProcessError as err:

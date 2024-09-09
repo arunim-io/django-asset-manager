@@ -14,7 +14,7 @@ class NodeModulesFinder(BaseFinder):
     A static files finder that finds static files stored in the `node_modules` directory (specified in the `NODE_MODULES_PATH` settings), while excluding any metadata or misc. files.
     """
 
-    storage = FileSystemStorage(location=settings.NODE_MODULES_PATH)
+    storage = FileSystemStorage(location=settings.node_modules_path)
 
     def find(self, path: str, *args, **kwargs) -> str | list[str]:
         paths = []
@@ -30,7 +30,7 @@ class NodeModulesFinder(BaseFinder):
         return paths
 
     def list(self, ignore_patterns):
-        for path in get_files(self.storage, settings.IGNORE_PATTERNS):
+        for path in get_files(self.storage, settings.ignore_patterns):
             yield path, self.storage
 
 
@@ -41,7 +41,7 @@ class ManifestNodeModulesFinder(NodeModulesFinder):
 
     def list(self, ignore_patterns):
         try:
-            package_json = json.loads(settings.PACKAGE_JSON_PATH.read_bytes())
+            package_json = json.loads(settings.package_json_path.read_bytes())
         except json.JSONDecodeError:
             yield from self.list(ignore_patterns)
 
@@ -51,6 +51,6 @@ class ManifestNodeModulesFinder(NodeModulesFinder):
             for package in packages:
                 if self.storage.exists(package):
                     for path in get_files(
-                        self.storage, settings.IGNORE_PATTERNS, package
+                        self.storage, settings.ignore_patterns, package
                     ):
                         yield path, self.storage
