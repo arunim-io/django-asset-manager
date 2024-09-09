@@ -34,6 +34,9 @@ classifiers = [
 keywords = ["django", "static"]
 dependencies = ["django>=4.2,<6", "pydantic>=2"]
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/node_loader"]
+
 [tool.uv]
 dev-dependencies = ["django-stubs", "ruff"]
 
