@@ -131,4 +131,4 @@ detect-same-package = true
 force-sort-within-sections = true
 force-wrap-aliases = true
 known-first-party = ["django"]
-known-third-party = ["django_node_loader"]
+known-third-party = ["node_loader"]

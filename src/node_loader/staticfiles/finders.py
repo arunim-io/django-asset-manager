@@ -2,7 +2,7 @@
 
 import json
 
-from django_node_loader.conf import settings
+from node_loader.conf import settings
 
 from django.contrib.staticfiles.finders import BaseFinder
 from django.contrib.staticfiles.utils import get_files
