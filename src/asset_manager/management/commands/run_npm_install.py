@@ -2,8 +2,7 @@
 
 from subprocess import CalledProcessError, check_output
 
-from node_loader.conf import settings
-
+from asset_manager.conf import settings
 from django.core.management.base import BaseCommand
 
 

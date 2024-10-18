@@ -3,13 +3,13 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "django-node-loader"
-version = "0.1.5"
-description = "Django app for managing assets using npm packages."
+name = "django-asset-manager"
+version = "0.1"
+description = "Django app for managing assets."
 readme = "README.md"
 license.file = "LICENSE"
 authors = [
-  { name = "Mugdha Arunim Ahmed", email = "mugshaarunimahmed2017@gmail.com" },
+  { name = "Mugdha Arunim Ahmed", email = "mugdhaarunimahmed2017@gmail.com" },
 ]
 requires-python = ">=3.8"
 classifiers = [
@@ -32,12 +32,10 @@ classifiers = [
   "Framework :: Django :: 5.1",
 ]
 keywords = ["django", "static"]
-dependencies = [
-    "django>=4.2,<6",
-]
+dependencies = ["django>=4.2,<6"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/node_loader"]
+packages = ["src/asset_manager"]
 
 [tool.uv]
 dev-dependencies = ["django-stubs", "ruff"]
@@ -136,4 +134,4 @@ detect-same-package = true
 force-sort-within-sections = true
 force-wrap-aliases = true
 known-first-party = ["django"]
-known-third-party = ["node_loader"]
+known-local-folder = ["asset_manager"]

@@ -2,8 +2,7 @@
 
 import json
 
-from node_loader.conf import settings
-
+from asset_manager.conf import settings
 from django.contrib.staticfiles.finders import BaseFinder
 from django.contrib.staticfiles.utils import get_files
 from django.core.files.storage import FileSystemStorage
