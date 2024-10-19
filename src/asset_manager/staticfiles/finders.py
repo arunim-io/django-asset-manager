@@ -1,11 +1,10 @@
 # ruff: noqa: E501
 
-import json
-
-from asset_manager.conf import settings
 from django.contrib.staticfiles.finders import BaseFinder
 from django.contrib.staticfiles.utils import get_files
 from django.core.files.storage import FileSystemStorage
+
+from asset_manager.conf import settings
 
 
 class NodeModulesFinder(BaseFinder):
@@ -39,17 +38,12 @@ class ManifestNodeModulesFinder(NodeModulesFinder):
     """
 
     def list(self, ignore_patterns):
-        try:
-            package_json = json.loads(settings.package_json_path.read_bytes())
-        except json.JSONDecodeError:
+        deps = settings.package_dependencies
+
+        if not deps:
             yield from self.list(ignore_patterns)
 
-        if package_json["dependencies"] is dict:
-            packages = dict(package_json["dependencies"]).keys()
-
-            for package in packages:
-                if self.storage.exists(package):
-                    for path in get_files(
-                        self.storage, settings.ignore_patterns, package
-                    ):
-                        yield path, self.storage
+        for package in deps:
+            if self.storage.exists(package):
+                for path in get_files(self.storage, settings.ignore_patterns, package):
+                    yield path, self.storage

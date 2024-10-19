@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field, fields
+import json
 from pathlib import Path
 import shutil
 from typing import Literal
@@ -94,6 +95,12 @@ class Settings:
             for field in fields(Settings)
         }
         return Settings(**parsed_settings)  # pyright: ignore[reportArgumentType]
+
+    @property
+    def package_dependencies(self) -> dict[str, str]:
+        data = dict(json.loads(self.package_json_path.read_text()))
+
+        return data.get("dependencies", {})
 
 
 settings = Settings.parse()
