@@ -34,11 +34,43 @@ classifiers = [
 keywords = ["django", "static"]
 dependencies = ["django>=4.2,<6"]
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/asset_manager"]
+[project.optional-dependencies]
+test = [
+  "pytest>=8.3.3",
+  "pytest-cov>=5.0.0",
+  "pytest-django>=4.9.0",
+  "pytest-xdist>=3.6.1",
+]
 
 [tool.uv]
 dev-dependencies = ["django-stubs", "ruff"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/asset_manager"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+pythonpath = [".", "src"]
+testpaths = ["tests"]
+addopts = '--cov --cov-report=html --cov-report=term'
+log_cli = true
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+parallel = true
+omit = ["*/migrations/*", "*/tests/*", "*/conftest.py"]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+  "pragma: no cover",
+  "def __repr__",
+  "if self.debug:",
+  "raise NotImplementedError",
+  "pass",
+  "if __name__ == .__main__.:",
+]
 
 [tool.basedpyright]
 typeCheckingMode = "basic"
