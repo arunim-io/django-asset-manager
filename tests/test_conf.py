@@ -21,19 +21,10 @@ def test_settings_type(settings: LazySettings, app_settings: Settings):
     assert type(app_settings) == Settings
 
 
-@pytest.fixture
-def temp_dir():
-    tmpdir = TemporaryDirectory()
-
-    yield tmpdir.name
-
-    tmpdir.cleanup()
-
-
-def test_settings_package_dependencies(app_settings: Settings, temp_dir: str):
+def test_settings_package_dependencies(app_settings: Settings, tmp_path: str):
     assert app_settings.package_dependencies is None
 
-    tmp_package_json = Path(temp_dir, "package.json")
+    tmp_package_json = Path(tmp_path, "package.json")
     tmp_package_json.write_text(json.dumps({"dependencies": {}}))
     app_settings.package_json_path = tmp_package_json
 
