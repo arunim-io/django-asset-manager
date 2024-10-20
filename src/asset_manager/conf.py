@@ -76,12 +76,13 @@ class PackageManagerSettings:
     def exe_path(self) -> Path | None:
         if exe := shutil.which(self.name):
             return Path(exe)
+
         return None
 
 
 @dataclass
 class Settings:
-    ignore_patterns: list[str] = field(default_factory=lambda: DEFAULT_IGNORE_PATTERNS)
+    ignore_patterns: list[str] = field(default_factory=list)
     node_modules_path: Path = Path(settings.BASE_DIR, "node_modules")
     package_json_path: Path = Path(settings.BASE_DIR, "package.json")
     package_manager: PackageManagerSettings = field(
@@ -90,14 +91,24 @@ class Settings:
 
     @staticmethod
     def parse():
+        app_settings = getattr(settings, "ASSET_MANAGER", {})
         parsed_settings = {
-            field.name: getattr(settings, field.name.upper(), field.default)
+            field.name: getattr(app_settings, field.name.upper(), field.default)
             for field in fields(Settings)
         }
+        parsed_settings["ignore_patterns"] = getattr(
+            app_settings, "IGNORE_PATTERNS", DEFAULT_IGNORE_PATTERNS
+        )
+        parsed_settings["package_manager"] = getattr(
+            app_settings, "PACKAGE_MANAGER", PackageManagerSettings()
+        )
         return Settings(**parsed_settings)  # pyright: ignore[reportArgumentType]
 
     @property
-    def package_dependencies(self) -> dict[str, str]:
+    def package_dependencies(self) -> dict[str, str] | None:
+        if not self.package_json_path.exists():
+            return None
+
         data = dict(json.loads(self.package_json_path.read_text()))
 
         return data.get("dependencies", {})
