@@ -10,7 +10,7 @@ def pytest_configure():
         DEBUG=True,
         SECRET_KEY="NOTASECRET",
         ALLOWED_HOSTS=["*"],
-        INSTALLED_APPS=["asset_manager"],
+        INSTALLED_APPS=["django.contrib.staticfiles", "asset_manager"],
         USE_TZ=True,
         STATIC_URL="/static/",
         STATICFILES_FINDERS=[

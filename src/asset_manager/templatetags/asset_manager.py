@@ -3,12 +3,12 @@ from pathlib import Path
 from django.template import Library, TemplateSyntaxError
 from django.templatetags.static import static
 
-from asset_manager.conf import settings
-from asset_manager.staticfiles.finders import NodeModulesFinder
+from asset_manager.conf import get_package_dependencies, settings
+from asset_manager.utils import get_staticfiles_finder
 
 register = Library()
-finder = NodeModulesFinder()
-node_modules_path = settings.node_modules_path
+finder = get_staticfiles_finder()
+node_modules_path = settings().get("NODE_MODULES_PATH")
 
 
 def resolve_path(path: str):
@@ -28,7 +28,7 @@ def node_module_asset(path: str):
         return static(path)
 
     package, target_file = resolve_path(path)
-    deps = settings.package_dependencies
+    deps = get_package_dependencies()
 
     final_path = None
 
