@@ -3,15 +3,13 @@ from pathlib import Path
 from django.template import Library, TemplateSyntaxError
 from django.templatetags.static import static
 
-from asset_manager.conf import settings
-from asset_manager.staticfiles.finders import NodeModulesFinder
+from asset_manager.conf import get_package_dependencies, settings
+from asset_manager.utils import get_staticfiles_finder
 
 register = Library()
-finder = NodeModulesFinder()
-node_modules_path = settings.node_modules_path
 
 
-def resolve_path(path: str):
+def resolve_path(path: str) -> tuple[str, str]:
     subs = Path(path).parts
 
     if len(subs) == 2:  # noqa: PLR2004
@@ -21,16 +19,18 @@ def resolve_path(path: str):
 
 
 @register.simple_tag
-def node_module_asset(path: str):
-    result = finder.find(path)
+def node_module_asset(path: str) -> str:
+    result = get_staticfiles_finder().find(path)
 
     if result is str:
         return static(path)
 
     package, target_file = resolve_path(path)
-    deps = settings.package_dependencies
+    deps = get_package_dependencies()
+    node_modules_path = settings().get("NODE_MODULES_PATH")
 
-    final_path = None
+    if not node_modules_path or not node_modules_path.exists():
+        return None
 
     if deps and package in deps:
         file = next(node_modules_path.rglob(target_file))

@@ -1,106 +1,106 @@
-from dataclasses import dataclass, field, fields
 import json
 from pathlib import Path
-import shutil
-from typing import Literal
+from typing import TypedDict
 
-from django.conf import settings
-
-DEFAULT_IGNORE_PATTERNS = [
-    "*.less",
-    "*.scss",
-    "*.styl",
-    "*.sh",
-    "*.htm",
-    "*.html",
-    "*.md",
-    "*.markdown",
-    "*.rst",
-    "*.php",
-    "*.rb",
-    "*.txt",
-    "*.map",
-    "*.yml",
-    "*.yaml",
-    "*.json",
-    "*.xml",
-    "*.ts",
-    "*.es6",
-    "*.coffee",
-    "*.litcoffee",
-    "*.lock",
-    "*.patch",
-    "README*",
-    "LICENSE*",
-    "LICENCE*",
-    "CHANGES",
-    "CHANGELOG",
-    "HISTORY",
-    "NOTICE",
-    "COPYING",
-    "license",
-    "*test*",
-    "*bin*",
-    "*samples*",
-    "*example*",
-    "*docs*",
-    "*tests*",
-    "*demo*",
-    "Makefile*",
-    "Gemfile*",
-    "Gruntfile*",
-    "gulpfile.js",
-    ".tagconfig",
-    ".npmignore",
-    ".gitignore",
-    ".gitattributes",
-    ".gitmodules",
-    ".editorconfig",
-    ".sqlite",
-    "grunt",
-    "gulp",
-    "less",
-    "sass",
-    "scss",
-    "coffee",
-    "tasks",
-    "node_modules",
-]
+from django.conf import settings as django_settings
 
 
-@dataclass
-class PackageManagerSettings:
-    name: Literal["npm", "yarn", "pnpm", "bun"] = "npm"
-
-    @property
-    def exe_path(self) -> Path | None:
-        if exe := shutil.which(self.name):
-            return Path(exe)
-        return None
+class SettingsDict(TypedDict, total=False):
+    IGNORE_PATTERNS: list[str]
+    NODE_MODULES_PATH: Path | str
+    PACKAGE_JSON_PATH: Path | str
 
 
-@dataclass
-class Settings:
-    ignore_patterns: list[str] = field(default_factory=lambda: DEFAULT_IGNORE_PATTERNS)
-    node_modules_path: Path = Path(settings.BASE_DIR, "node_modules")
-    package_json_path: Path = Path(settings.BASE_DIR, "package.json")
-    package_manager: PackageManagerSettings = field(
-        default_factory=PackageManagerSettings,
+DEFAULT_SETTINGS: SettingsDict = {
+    "DEFAULT_IGNORE_PATTERNS": [
+        "*.less",
+        "*.scss",
+        "*.styl",
+        "*.sh",
+        "*.htm",
+        "*.html",
+        "*.md",
+        "*.markdown",
+        "*.rst",
+        "*.php",
+        "*.rb",
+        "*.txt",
+        "*.map",
+        "*.yml",
+        "*.yaml",
+        "*.json",
+        "*.xml",
+        "*.ts",
+        "*.es6",
+        "*.coffee",
+        "*.litcoffee",
+        "*.lock",
+        "*.patch",
+        "README*",
+        "LICENSE*",
+        "LICENCE*",
+        "CHANGES",
+        "CHANGELOG",
+        "HISTORY",
+        "NOTICE",
+        "COPYING",
+        "license",
+        "*test*",
+        "*bin*",
+        "*samples*",
+        "*example*",
+        "*docs*",
+        "*tests*",
+        "*demo*",
+        "Makefile*",
+        "Gemfile*",
+        "Gruntfile*",
+        "gulpfile.js",
+        ".tagconfig",
+        ".npmignore",
+        ".gitignore",
+        ".gitattributes",
+        ".gitmodules",
+        ".editorconfig",
+        ".sqlite",
+        "grunt",
+        "gulp",
+        "less",
+        "sass",
+        "scss",
+        "coffee",
+        "tasks",
+        "node_modules",
+    ],
+    "DEFAULT_NODE_MODULES_PATH": Path(django_settings.BASE_DIR, "node_modules"),
+    "DEFAULT_PACKAGE_JSON_PATH": Path(django_settings.BASE_DIR, "package.json"),
+}
+
+
+def settings() -> SettingsDict:
+    app_settings: SettingsDict = getattr(
+        django_settings,
+        "ASSET_MANAGER",
+        DEFAULT_SETTINGS,
     )
 
-    @staticmethod
-    def parse():
-        parsed_settings = {
-            field.name: getattr(settings, field.name.upper(), field.default)
-            for field in fields(Settings)
-        }
-        return Settings(**parsed_settings)  # pyright: ignore[reportArgumentType]
+    if isinstance(app_settings.get("NODE_MODULES_PATH"), str):
+        app_settings["NODE_MODULES_PATH"] = Path(app_settings["NODE_MODULES_PATH"])
 
-    @property
-    def package_dependencies(self) -> dict[str, str]:
-        data = dict(json.loads(self.package_json_path.read_text()))
+    if isinstance(app_settings.get("PACKAGE_JSON_PATH"), str):
+        app_settings["PACKAGE_JSON_PATH"] = Path(app_settings["PACKAGE_JSON_PATH"])
 
-        return data.get("dependencies", {})
+    return app_settings
 
 
-settings = Settings.parse()
+def get_package_dependencies(path=None) -> dict[str, str] | None:
+    package_json_path = (
+        Path(path) if path is not None else settings().get("PACKAGE_JSON_PATH")
+    )
+
+    if not package_json_path or not package_json_path.exists():
+        return None
+    with package_json_path.open() as f:
+        data = json.load(f)
+
+    return data.get("dependencies")

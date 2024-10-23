@@ -1,12 +1,10 @@
 from pathlib import Path
 
-import pytest
-
-from django.conf import settings
+from django.conf import settings as django_settings
 
 
 def pytest_configure():
-    settings.configure(
+    django_settings.configure(
         DEBUG=True,
         SECRET_KEY="NOTASECRET",
         ALLOWED_HOSTS=["*"],
@@ -14,13 +12,7 @@ def pytest_configure():
         USE_TZ=True,
         STATIC_URL="/static/",
         STATICFILES_FINDERS=[
-            "django.contrib.staticfiles.finders.FileSystemFinder",
-            "django.contrib.staticfiles.finders.AppDirectoriesFinder",
-            "asset_manager.staticfiles.finders.ManifestNodeModulesFinder",
+            "asset_manager.staticfiles.finders.ManifestNodeModulesFinder"
         ],
+        BASE_DIR=Path(__name__).parent,
     )
-
-
-@pytest.fixture(scope="session")
-def setup_base_dir(tmp_path: Path):
-    settings.BASE_DIR = tmp_path
